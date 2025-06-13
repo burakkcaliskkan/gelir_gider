@@ -181,17 +181,57 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
                 : ListView.builder(
                     itemCount: filtered.length,
                     itemBuilder: (context, index) => Dismissible(
-                      key: Key(index.toString()),
+                      key: Key(filtered[index].hashCode.toString()),
                       background: Container(
                           color: Colors.red,
                           alignment: Alignment.centerLeft,
                           child: Icon(Icons.delete, color: Colors.white)),
                       direction: DismissDirection.startToEnd,
-                      onDismissed: (_) {
-                        Provider.of<TransactionProvider>(context, listen: false)
-                            .deleteTransaction(index);
+                      onDismissed: (_) async {
+                        final provider = Provider.of<TransactionProvider>(
+                            context,
+                            listen: false);
+                        final transaction = filtered[index];
+                        final realIndex =
+                            provider.transactions.indexOf(transaction);
+                        if (realIndex != -1) {
+                          await provider.deleteTransaction(realIndex);
+                        }
                       },
-                      child: TransactionCard(transaction: filtered[index]),
+                      child: TransactionCard(
+                        transaction: filtered[index],
+                        onDelete: () async {
+                          final shouldDelete = await showDialog<bool>(
+                            context: context,
+                            builder: (context) => AlertDialog(
+                              title: Text(
+                                  'İşlemi silmek istediğinize emin misiniz?'),
+                              actions: [
+                                TextButton(
+                                  onPressed: () =>
+                                      Navigator.pop(context, false),
+                                  child: Text('Vazgeç'),
+                                ),
+                                TextButton(
+                                  onPressed: () => Navigator.pop(context, true),
+                                  child: Text('Sil'),
+                                ),
+                              ],
+                            ),
+                          );
+                          if (shouldDelete == true) {
+                            final provider = Provider.of<TransactionProvider>(
+                                context,
+                                listen: false);
+                            final transaction = filtered[index];
+                            final realIndex =
+                                provider.transactions.indexOf(transaction);
+                            if (realIndex != -1) {
+                              await provider.deleteTransaction(realIndex);
+                            }
+                          }
+                        },
+                      ),
                     ),
                   ),
           ),

@@ -158,7 +158,39 @@ class HomeScreen extends StatelessWidget {
                   : ListView.builder(
                       itemCount: todayTransactions.length,
                       itemBuilder: (context, index) => TransactionCard(
-                          transaction: todayTransactions[index]),
+                        transaction: todayTransactions[index],
+                        onDelete: () async {
+                          final shouldDelete = await showDialog<bool>(
+                            context: context,
+                            builder: (context) => AlertDialog(
+                              title: Text(
+                                  'İşlemi silmek istediğinize emin misiniz?'),
+                              actions: [
+                                TextButton(
+                                  onPressed: () =>
+                                      Navigator.pop(context, false),
+                                  child: Text('Vazgeç'),
+                                ),
+                                TextButton(
+                                  onPressed: () => Navigator.pop(context, true),
+                                  child: Text('Sil'),
+                                ),
+                              ],
+                            ),
+                          );
+                          if (shouldDelete == true) {
+                            final provider = Provider.of<TransactionProvider>(
+                                context,
+                                listen: false);
+                            final transaction = todayTransactions[index];
+                            final realIndex =
+                                provider.transactions.indexOf(transaction);
+                            if (realIndex != -1) {
+                              await provider.deleteTransaction(realIndex);
+                            }
+                          }
+                        },
+                      ),
                     ),
             ),
           ],

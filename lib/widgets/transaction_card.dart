@@ -4,8 +4,9 @@ import 'package:intl/intl.dart';
 
 class TransactionCard extends StatelessWidget {
   final Transaction transaction;
+  final VoidCallback? onDelete;
 
-  const TransactionCard({required this.transaction, super.key});
+  const TransactionCard({required this.transaction, this.onDelete, super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -41,13 +42,25 @@ class TransactionCard extends StatelessWidget {
         ),
         subtitle: Text(
             '${transaction.category} • ${DateFormat('dd MMM yyyy').format(transaction.date)}'),
-        trailing: Text(
-          '${isIncome ? '+' : '-'}${transaction.amount.toStringAsFixed(2)} ₺',
-          style: TextStyle(
-            color: color,
-            fontWeight: FontWeight.bold,
-            fontSize: 18,
-          ),
+        trailing: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(
+              '${isIncome ? '+' : '-'}${transaction.amount.toStringAsFixed(2)} ₺',
+              style: TextStyle(
+                color: color,
+                fontWeight: FontWeight.bold,
+                fontSize: 18,
+              ),
+            ),
+            const SizedBox(width: 8),
+            if (onDelete != null)
+              IconButton(
+                icon: Icon(Icons.delete, color: Colors.red),
+                onPressed: onDelete,
+                tooltip: 'Sil',
+              ),
+          ],
         ),
       ),
     );
